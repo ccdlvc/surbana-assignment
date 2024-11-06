@@ -1,19 +1,37 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+// location.entity.ts
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+} from 'typeorm';
+import { IsNotEmpty, IsString } from 'class-validator';
 
-@Entity()
+@Entity({ name: 'tb_location' })
 export class Location {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
 
-  @Column()
-  building: string;
-
-  @Column()
+  @IsNotEmpty()
+  @IsString()
+  @Column({ name: 'name', nullable: false })
   name: string;
 
-  @Column()
-  number: string;
+  @IsNotEmpty()
+  @IsString()
+  @Column({ name: 'location_number', nullable: false })
+  locationNumber: string;
 
-  @Column()
-  area: string;
+  @Column('float', { name: 'area', nullable: false })
+  area: number;
+
+  @ManyToOne(() => Location, (location) => location.children)
+  @JoinColumn({ name: 'parent_id' })
+  parent: Location;
+  @Column({ name: 'parent_id', nullable: true }) parentId: number;
+
+  @OneToMany(() => Location, (location) => location.parent)
+  children: Location[];
 }

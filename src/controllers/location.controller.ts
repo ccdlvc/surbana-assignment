@@ -1,33 +1,63 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
-import { Location } from '../entities/location.entity';
+import {
+  Controller,
+  Post,
+  Get,
+  Put,
+  Delete,
+  Param,
+  Body,
+  UsePipes,
+  ValidationPipe,
+  ParseIntPipe,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { LocationService } from '../services/location.service';
+import { CreateLocationDto, UpdateLocationDto } from '../dtos/location.dto';
 
-@Controller('locations')
+@Controller('api/v1/locations')
 export class LocationController {
   constructor(private readonly locationService: LocationService) {}
 
+  @Post()
+  @UsePipes(new ValidationPipe({ transform: true }))
+  create(@Body() createLocationDto: CreateLocationDto) {
+    if (createLocationDto.name.length > 10) {
+      throw new HttpException(
+        'Location Name must be smaller than 10 characters',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return this.locationService.create(createLocationDto);
+  }
+
   @Get()
-  findAll(): Promise<Location[]> {
+  findAll() {
     return this.locationService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number): Promise<Location> {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.locationService.findOne(id);
   }
 
-  @Post()
-  create(@Body() location: Location): Promise<Location> {
-    return this.locationService.create(location);
-  }
-
   @Put(':id')
-  update(@Param('id') id: number, @Body() location: Location): Promise<Location> {
-    return this.locationService.update(id, location);
+  @UsePipes(new ValidationPipe({ transform: true }))
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateLocationDto: UpdateLocationDto,
+  ) {
+    if (updateLocationDto.name.length > 10) {
+      throw new HttpException(
+        'Location Name must be smaller than 10 characters',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return this.locationService.update(id, updateLocationDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: number): Promise<void> {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.locationService.remove(id);
   }
 }

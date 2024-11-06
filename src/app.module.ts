@@ -1,7 +1,10 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LocationModule } from './modules/location.module';
+import { SanitizeMiddleware } from './middlewares/sanitize.middleware';
+import { loggerConfig } from './common/logger.config';
+import { WinstonModule } from 'nest-winston';
 
 @Module({
   imports: [
@@ -24,7 +27,12 @@ import { LocationModule } from './modules/location.module';
       }),
       inject: [ConfigService],
     }),
+    WinstonModule.forRoot(loggerConfig),
     LocationModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(SanitizeMiddleware).forRoutes('*');
+  }
+}
