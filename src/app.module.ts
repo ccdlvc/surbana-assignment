@@ -5,6 +5,9 @@ import { LocationModule } from './modules/location.module';
 import { SanitizeMiddleware } from './middlewares/sanitize.middleware';
 import { loggerConfig } from './common/logger.config';
 import { WinstonModule } from 'nest-winston';
+import { BuildingModule } from './modules/building.module';
+import { Building } from './entities/building.entity';
+import { Location } from './entities/location.entity';
 
 @Module({
   imports: [
@@ -22,13 +25,14 @@ import { WinstonModule } from 'nest-winston';
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
         schema: configService.get<string>('DB_SCHEMA'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        entities: [Location, Building],
         synchronize: true,
       }),
       inject: [ConfigService],
     }),
     WinstonModule.forRoot(loggerConfig),
     LocationModule,
+    BuildingModule,
   ],
 })
 export class AppModule implements NestModule {

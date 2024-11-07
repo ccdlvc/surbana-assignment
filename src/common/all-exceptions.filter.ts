@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-import { ResponseDto } from '../dtos/location.dto';
+import { ResponseDto } from '../dtos/common.dto';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -32,12 +32,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
         ? exception.getResponse()
         : 'Internal server error';
     const message =
-      exception instanceof HttpException
-        ? exception.getResponse().toString()
-        : 'Internal server error';
+      typeof messageObj === 'string' ? messageObj : JSON.stringify(messageObj);
 
     this.logger.error(
-      `HTTP Status: ${status} Error Message: ${JSON.stringify(messageObj)}`,
+      `HTTP Status: ${status} Error Message: ${message}`,
       exception instanceof Error ? exception.stack : '',
     );
 
